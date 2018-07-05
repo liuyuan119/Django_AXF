@@ -1,0 +1,12 @@
+我的页面注册
+
+
+登录html
+
+
+改urls  user_register
+写urls  user_login
+
+django缓存  建表
+python manage.py cre,.,
+

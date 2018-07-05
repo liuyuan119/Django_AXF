@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>test swiper</title>
+
+    <link rel="stylesheet" href="swiper.css">
+</head>
+<body>
+
+<div class="swiper-container">
+    <div class="swiper-wrapper">
+        <div class="swiper-slide">
+            <img src="360壁纸_a205120.jpg" alt="" style="width: 100%">
+        </div>
+        <div class="swiper-slide">
+            <img src="360壁纸_a206207.jpg" alt="" style="width: 100%">
+        </div>
+
+    </div>
+    <!-- 如果需要分页器 -->
+    <div class="swiper-pagination"></div>
+
+    <!-- 如果需要导航按钮 -->
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-button-next"></div>
+
+    <!-- 如果需要滚动条 -->
+    <div class="swiper-scrollbar"></div>
+
+</div>
+
+<script src="jquery.js"></script>
+<script src="swiper.jquery.js"></script>
+
+<script>
+
+    var mySwiper = new Swiper('.swiper-container', {
+        // 如果需要分页器
+        loop: true,
+            // 如果需要前进后退按钮
+    nextButton: '.swiper-button-next',
+    prevButton: '.swiper-button-prev',
+        pagination: '.swiper-pagination',
+            // 如果需要滚动条
+    scrollbar: '.swiper-scrollbar',
+                autoplay: 1000,
+
+    })
+
+
+</script>
+</body>
+</html>
