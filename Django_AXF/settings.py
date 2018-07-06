@@ -122,3 +122,31 @@ STATICFILES_DIRS = [
 ]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/upload')
+
+
+CACHES = {
+    'default': {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+#         'LOCATION': 'my_cache_table',
+#         'TIMEOUT': '60',
+#     }
+# }
+
+
+EMAIL_HOST = 'smtp.163.com'
+
+EMAIL_PORT = 25
+
+EMAIL_HOST_USER = "liuyuan2684119@163.com"
+
+EMAIL_HOST_PASSWORD = "liuyuan119"

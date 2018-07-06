@@ -62,7 +62,7 @@
 
             </ul>
         </div>
-        {#        商店   #}
+{#        商店   #}
         <div class="cvs">
 
             <h2>
@@ -80,10 +80,10 @@
 
             <ul>
                 {% for shop in shop3_7 %}
-                    <li>
-                        <img src="{{ shop.img }}" alt="{{ shop.name }}">
-                        <span>{{ shop.name }}</span>
-                    </li>
+                <li>
+                    <img src="{{ shop.img }}" alt="{{ shop.name }}">
+                    <span>{{ shop.name }}</span>
+                </li>
                 {% endfor %}
 
             </ul>
@@ -101,7 +101,7 @@
 
 
         </div>
-        {#        MainShow  主显示区域    #}
+{#        MainShow  主显示区域    #}
         <div class="mainInfo">
 
             {% for mainshow in mainshows %}
@@ -130,7 +130,7 @@
                             </a>
                             <button>+</button>
                         </li>
-                        <li>
+                         <li>
                             <a href="#">
                                 <img src="{{ mainshow.img2 }}" alt="{{ mainshow.longname2 }}">
                                 <p class="description">{{ mainshow.longname2 }}</p>
@@ -139,7 +139,7 @@
                             </a>
                             <button>+</button>
                         </li>
-                        <li>
+                         <li>
                             <a href="#">
                                 <img src="{{ mainshow.img3 }}" alt="{{ mainshow.longname3 }}">
                                 <p class="description">{{ mainshow.longname3 }}</p>

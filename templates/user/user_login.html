@@ -2,11 +2,15 @@
 {% load static %}
 
 {% block extJS %}
+    {{ block.super }}
     <script type="text/javascript" src="{% static 'axf/user/js/user_login.js' %}"></script>
 {% endblock %}
+
 {% block content %}
 
     <div id="user_login" class="container">
+
+        <h4>{{ msg }}</h4>
 
         <form action="{% url 'axf:user_login' %}" method="post" onsubmit="return password_hash()">
 

@@ -1,5 +1,6 @@
 import hashlib
 
+from django.contrib.auth.hashers import make_password, check_password
 from django.db import models
 
 
@@ -108,11 +109,11 @@ class FoodType(models.Model):
         db_table = "axf_foodtypes"
 
 
-#
-# insert into axf_goods(productid,productimg,productname,productlongname,isxf,pmdesc,specifics,price,marketprice,
-# categoryid,childcid,childcidname,dealerid,storenums,productnum) values("11951","http://img01.bqstatic.com/upload/goods/000/001/1951/0000011951_63930.jpg@200w_200h_90Q",
-# "","乐吧薯片鲜虾味50.0g",0,0,"50g",2.00,2.500000,103541,103543,"膨化食品","4858",200,4);
-#
+"""
+insert into axf_goods(productid,productimg,productname,productlongname,isxf,pmdesc,specifics,price,marketprice,
+categoryid,childcid,childcidname,dealerid,storenums,productnum) values("11951","http://img01.bqstatic.com/upload/goods/000/001/1951/0000011951_63930.jpg@200w_200h_90Q",
+"","乐吧薯片鲜虾味50.0g",0,0,"50g",2.00,2.500000,103541,103543,"膨化食品","4858",200,4);
+"""
 
 
 class Goods(models.Model):
@@ -139,7 +140,7 @@ class Goods(models.Model):
 class UserModel(models.Model):
     u_name = models.CharField(max_length=32, unique=True)
 
-    u_password = models.CharField(max_length=256)
+    _password = models.CharField(max_length=256, null=True, db_column='u_password')
 
     u_email = models.CharField(max_length=64, unique=True)
 
@@ -149,23 +150,85 @@ class UserModel(models.Model):
 
     is_delete = models.BooleanField(default=False)
 
-    def set_password(self, password):
-        md5 = hashlib.md5()
+    @property
+    def u_password(self):
+        return self._password
 
-        md5.update(password.encode("utf-8"))
+    @u_password.setter
+    def u_password(self, pwd):
+        self._password = make_password(pwd)
 
-        password = md5.hexdigest()
+    def check_password(self, pwd):
+        return check_password(pwd, self._password)
 
-        self.u_password = password
-
-    def check_password(self, password):
-        md5 = hashlib.md5()
-
-        md5.update(password.encode("utf-8"))
-
-        password = md5.hexdigest()
-
-        return self.u_password == password
+    # def set_password(self, password):
+    #
+    #     # md5 = hashlib.md5()
+    #     #
+    #     # md5.update(password.encode("utf-8"))
+    #     #
+    #     # password = md5.hexdigest()
+    #
+    #     password = make_password(password)
+    #
+    #     self.u_password = password
+    #
+    # def check_password(self, password):
+    #     # md5 = hashlib.md5()
+    #     #
+    #     # md5.update(password.encode("utf-8"))
+    #     #
+    #     # password = md5.hexdigest()
+    #
+    #     # return self.u_password == password
+    #     return check_password(password, self.u_password)
 
     class Meta:
         db_table = "axf_user"
+
+
+class Cart(models.Model):
+    c_goods = models.ForeignKey(Goods)
+
+    c_user = models.ForeignKey(UserModel)
+
+    is_select = models.BooleanField(default=True)
+
+    c_goods_num = models.IntegerField(default=1)
+
+    # 修改打印时的显示  python2 unicode
+    # def __str__(self):
+    #     return str(self.c_goods_num)
+
+    class Meta:
+        db_table = 'axf_cart'
+
+
+class Order(models.Model):
+    o_user = models.ForeignKey(UserModel)
+
+    o_total_price = models.FloatField(default=0)
+    """
+        需要建立映射
+            0 代表已下单未付款
+            1 已下单已付款未发货
+            2 已下单已付款已发货未收货
+            3 ...
+    """
+    o_status = models.IntegerField(default=0)
+
+    o_time = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "axf_order"
+
+
+class OrderGoods(models.Model):
+    o_order = models.ForeignKey(Order)
+
+    o_goods = models.ForeignKey(Goods)
+
+    o_goods_num = models.IntegerField(default=1)
+
+    class Meta:
+        db_table = "axf_ordergoods"
