@@ -205,39 +205,6 @@ def mine(request):
     return render(request, 'mine/mine.html', context=data)
 
 
-def add_to_cart(request):
-    user_id = request.session.get('user_id')
-
-    user = get_user_by_id(user_id)
-
-    data = {}
-
-    if not user:
-        # 重定向
-        data['status'] = "902"
-        data['msg'] = "not login"
-    else:
-        goods_id = request.GET.get("goodsid")
-
-        carts = Cart.objects.filter(c_user=user).filter(c_goods_id=goods_id)
-
-        if carts.exists():
-            cart_obj = carts.first()
-            cart_obj.c_goods_num = cart_obj.c_goods_num + 1
-            cart_obj.save()
-        else:
-            cart_obj = Cart()
-            cart_obj.c_goods_id = goods_id
-            cart_obj.c_user_id = user_id
-            cart_obj.save()
-
-        data['msg'] = 'add success'
-        data['status'] = "201"
-        data['cart_goods_num'] = cart_obj.c_goods_num
-
-    return JsonResponse(data)
-
-
 class UserRegisterView(View):
 
     def get(self, request):
@@ -428,10 +395,51 @@ def change_cart_List_status(request):
     return JsonResponse(data)
 
 
+def add_to_cart(request):
+    cartid = request.GET.get("cartid")
+
+    user_id = request.session.get('user_id')
+
+    user = get_user_by_id(user_id)
+
+    data = {}
+
+    if not user:
+        # 重定向
+        data['status'] = "902"
+        data['msg'] = "not login"
+    else:
+        goods_id = request.GET.get("goodsid") or Cart.objects.get(pk=cartid).c_goods_id
+
+        carts = Cart.objects.filter(c_user=user).filter(c_goods_id=goods_id)
+
+        if carts.exists():
+            cart_obj = carts.first()
+            cart_obj.c_goods_num = cart_obj.c_goods_num + 1
+            cart_obj.save()
+        else:
+            cart_obj = Cart()
+            cart_obj.c_goods_id = goods_id
+            cart_obj.c_user_id = user_id
+            cart_obj.save()
+
+        data['msg'] = 'add success'
+        data['status'] = "200"
+        data['c_goods_num'] = cart_obj.c_goods_num
+        data["total_price"] = get_total_price(request.session.get("user_id")),
+
+    return JsonResponse(data)
+
+
 def sub_to_cart(request):
     cartid = request.GET.get("cartid")
 
-    cart_obj = Cart.objects.get(pk=cartid)
+    user_id = request.session.get('user_id')
+
+    if cartid:
+        cart_obj = Cart.objects.get(pk=cartid)
+    else:
+        cart_obj = Cart.objects.filter(c_user_id=user_id).filter(c_goods_id=request.GET.get("goodsid")).first()
 
     data = {
         "status": "200",
@@ -449,3 +457,7 @@ def sub_to_cart(request):
     data["total_price"] = get_total_price(request.session.get("user_id")),
 
     return JsonResponse(data)
+
+
+# def test(request):
+#     return True

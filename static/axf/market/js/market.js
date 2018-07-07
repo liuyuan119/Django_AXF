@@ -64,9 +64,41 @@ $(function () {
 
             if (data["status"] == "902") {
                 window.open('/axf/userlogin/', target = "_self");
-            } else if (data['status'] == "201") {
+            } else if (data['status'] == "200") {
                 console.log("改变数量");
-                $add.prev("span").html(data["cart_goods_num"]);
+                $add.prev("span").html(data["c_goods_num"]);
+            }
+
+            //    ajax请求回来之后的操作 写在这
+
+        })
+
+        // ajax 并行操作写在这
+        // console.log("哈哈");
+
+    })
+
+    //    添加到购物车
+    $(".subShopping").click(function () {
+
+        console.log("添加到购物车");
+
+        var $sub = $(this);
+
+        var goodsid = $sub.attr("goodsid");
+
+        // console.log($(this).prop("goodsid"));
+
+        // 参数可以直接进行拼接
+        // 也可以使用第二个参数传递字典的形式进行参数设置  更推荐使用第二种
+        $.getJSON("/axf/subtocart/", {"goodsid": goodsid}, function (data) {
+            console.log(data);
+
+            if (data["status"] == "902") {
+                window.open('/axf/userlogin/', target = "_self");
+            } else if (data['status'] == "200") {
+                console.log("改变数量");
+                $sub.next("span").html(data["c_goods_num"]);
             }
 
             //    ajax请求回来之后的操作 写在这

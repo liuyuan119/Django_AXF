@@ -110,7 +110,7 @@ $(function () {
 
         $.getJSON("/axf/subtocart/", {"cartid": cartid}, function (data) {
 
-            console.log(data)
+            console.log(data);
 
             if (data["status"] == "200") {
 
@@ -119,6 +119,26 @@ $(function () {
                 } else {
                     $subShopping.parents(".menuList").remove();
                 }
+                $("#total_price").html(data["total_price"])
+            }
+        })
+    });
+
+
+    $(".addShopping").click(function () {
+
+        var $addShopping = $(this);
+
+        var cartid = $addShopping.parents(".menuList").attr('cartid');
+
+        console.log(cartid);
+
+        $.getJSON("/axf/addtocart/", {"cartid": cartid}, function (data) {
+
+            console.log(data);
+
+            if (data["status"] == "200") {
+                $addShopping.prev("span").html(data['c_goods_num']);
                 $("#total_price").html(data["total_price"])
             }
         })

@@ -23,5 +23,6 @@ urlpatterns = [
     url(r'^changecartstatus/', views.change_cart_status, name='change_cart_status'),
     url(r'^changecartliststatus/', views.change_cart_List_status, name='change_cart_List_status'),
     url(r'^subtocart/', views.sub_to_cart, name='sub_to_cart'),
+    # url(r'^test/', views.test, name='test'),
 
 ]
