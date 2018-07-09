@@ -250,7 +250,8 @@ def add_to_cart(request):
 
         data['msg'] = 'add success'
         data['status'] = "200"
-        data['cart_goods_num'] = cart_obj.c_goods_num
+        data['c_goods_num'] = cart_obj.c_goods_num
+        data["total_price"] = get_total_price(request.session.get("user_id"))
 
     return JsonResponse(data)
 

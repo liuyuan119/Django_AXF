@@ -64,7 +64,7 @@ $(function () {
 
             if (data["status"] == "902"){
                 window.open('/axf/userlogin/', target="_self");
-            }else if (data['status'] == "201"){
+            }else if (data['status'] == "200"){
                 console.log("改变数量");
                 $add.prev("span").html(data["cart_goods_num"]);
             }

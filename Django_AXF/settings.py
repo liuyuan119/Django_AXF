@@ -47,7 +47,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'middle.LearnAOP.HelloMiddle',
+    # 'middle.LearnAOP.HelloMiddle',
 ]
 
 ROOT_URLCONF = 'Django_AXF.urls'
