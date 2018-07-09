@@ -21,8 +21,14 @@ urlpatterns = [
 
     url(r'^active/', views.active, name='active'),
     url(r'^changecartstatus/', views.change_cart_status, name='change_cart_status'),
-    url(r'^changecartliststatus/', views.change_cart_List_status, name='change_cart_List_status'),
+    url(r'^changecartliststatus/', views.change_cart_list_status, name='change_cart_list_status'),
     url(r'^subtocart/', views.sub_to_cart, name='sub_to_cart'),
-    # url(r'^test/', views.test, name='test'),
+
+    url(r'^makeorder/', views.make_order, name='make_order'),
+    url(r'^orderdetail/', views.order_detail, name='order_detail'),
+    url(r'^orderlist/', views.order_list, name='order_list'),
+    url(r'^alipay/', views.alipay, name='alipay'),
+    url(r'^getphone/', views.get_phone, name='get_phone'),
+    url(r'^getarticle/', views.get_article, name='get_article'),
 
 ]

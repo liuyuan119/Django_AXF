@@ -1,3 +1,4 @@
+import random
 import uuid
 from time import sleep
 
@@ -11,7 +12,9 @@ from django.views import View
 from django.views.decorators.cache import cache_page
 from django.views.generic import TemplateView
 
-from App.models import MainWheel, MainNav, MainMustBuy, MainShop, MainShow, FoodType, Goods, UserModel, Cart
+from App.models import MainWheel, MainNav, MainMustBuy, MainShop, MainShow, FoodType, Goods, UserModel, Cart, Order, \
+    OrderGoods
+from App.tasks import send_mail_asy
 from App.viewhelper import get_user, send_mail_to, get_user_by_id, get_total_price
 
 ALL_TYPE = "0"
@@ -178,11 +181,15 @@ def cart(request):
 
     total_price = get_total_price(user_id)
 
+    # for cart_obj in carts:
+    #     if cart_obj.is_select:
+    #         total_price += cart_obj.c_goods_num * cart_obj.c_goods.price
+
     data = {
         "title": "购物车",
         "carts": carts,
-        'all_select': all_select,
-        'total_price': total_price,
+        "all_select": all_select,
+        "total_price": total_price
     }
 
     return render(request, 'cart/cart.html', context=data)
@@ -198,11 +205,54 @@ def mine(request):
 
     if user_id:
         user = UserModel.objects.get(pk=user_id)
+
+        not_payed = user.order_set.filter(o_status=0).count()
+        data["not_payed"] = not_payed
+
+        payed = user.order_set.filter(o_status=1).count()
+        data["payed"] = payed
         data['is_login'] = True
         data["username"] = user.u_name
         data["icon"] = "/static/upload/" + user.u_icon.url
 
     return render(request, 'mine/mine.html', context=data)
+
+
+def add_to_cart(request):
+    user_id = request.session.get('user_id')
+
+    user = get_user_by_id(user_id)
+
+    # ##
+    cartid = request.GET.get("cartid")
+
+    data = {}
+
+    if not user:
+        # 重定向
+        data['status'] = "902"
+        data['msg'] = "not login"
+    else:
+        # goods_id = request.GET.get("goodsid")
+        goods_id = request.GET.get("goodsid") or Cart.objects.get(pk=cartid).c_goods_id
+
+        carts = Cart.objects.filter(c_user=user).filter(c_goods_id=goods_id)
+
+        if carts.exists():
+            cart_obj = carts.first()
+            cart_obj.c_goods_num = cart_obj.c_goods_num + 1
+            cart_obj.save()
+        else:
+            cart_obj = Cart()
+            cart_obj.c_goods_id = goods_id
+            cart_obj.c_user_id = user_id
+            cart_obj.save()
+
+        data['msg'] = 'add success'
+        data['status'] = "200"
+        data['cart_goods_num'] = cart_obj.c_goods_num
+
+    return JsonResponse(data)
 
 
 class UserRegisterView(View):
@@ -335,6 +385,9 @@ def active(request):
         return HttpResponse("激活信息过期，请重新申请激活邮件")
 
 
+# 如果让你自行添加校验
+# 判断用户登录
+# 判断购物车是否存在
 def change_cart_status(request):
     cart_id = request.GET.get("cartid")
 
@@ -349,7 +402,6 @@ def change_cart_status(request):
     if cart_obj.is_select:
         user_id = request.session.get("user_id")
         carts = Cart.objects.filter(c_user_id=user_id).filter(is_select=False)
-
         if carts.exists():
             all_select = False
 
@@ -357,82 +409,54 @@ def change_cart_status(request):
         "msg": "ok",
         "status": "200",
         "is_select": cart_obj.is_select,
-        'all_select': all_select,
-        'total_price': get_total_price(request.session.get("user_id")),
-
+        "all_select": all_select,
+        "total_price": get_total_price(request.session.get("user_id"))
     }
 
     return JsonResponse(data)
 
 
-def change_cart_List_status(request):
+def change_cart_list_status(request):
     action = request.GET.get("action")
 
-    cart_list = request.GET.get("cartList")
+    cart_list = request.GET.get("cartlist")
+
+    # print(action)
+    #
+    # print(cart_list)
 
     carts = cart_list.split("#")
 
     if action == "select":
-        # pk__in 选出主键再已有列表的所有元素
+        # 选出主键在已有列表的所有元素
+
         # Cart.objects.filter(pk__in=carts).update({"is_select": True})
+
         for cart_id in carts:
             cart_obj = Cart.objects.get(pk=cart_id)
             cart_obj.is_select = True
             cart_obj.save()
+
     elif action == "unselect":
-        # Cart.objects.filter(pk__in=carts).update({"is_select": False})
         for cart_id in carts:
             cart_obj = Cart.objects.get(pk=cart_id)
             cart_obj.is_select = False
             cart_obj.save()
+
     data = {
         "msg": "ok",
         "status": "200",
         "action": action,
-        'total_price': get_total_price(request.session.get("user_id")),
-
+        "total_price": get_total_price(request.session.get("user_id"))
     }
-    return JsonResponse(data)
-
-
-def add_to_cart(request):
-    cartid = request.GET.get("cartid")
-
-    user_id = request.session.get('user_id')
-
-    user = get_user_by_id(user_id)
-
-    data = {}
-
-    if not user:
-        # 重定向
-        data['status'] = "902"
-        data['msg'] = "not login"
-    else:
-        goods_id = request.GET.get("goodsid") or Cart.objects.get(pk=cartid).c_goods_id
-
-        carts = Cart.objects.filter(c_user=user).filter(c_goods_id=goods_id)
-
-        if carts.exists():
-            cart_obj = carts.first()
-            cart_obj.c_goods_num = cart_obj.c_goods_num + 1
-            cart_obj.save()
-        else:
-            cart_obj = Cart()
-            cart_obj.c_goods_id = goods_id
-            cart_obj.c_user_id = user_id
-            cart_obj.save()
-
-        data['msg'] = 'add success'
-        data['status'] = "200"
-        data['c_goods_num'] = cart_obj.c_goods_num
-        data["total_price"] = get_total_price(request.session.get("user_id")),
 
     return JsonResponse(data)
 
 
 def sub_to_cart(request):
     cartid = request.GET.get("cartid")
+
+    # cart_obj = Cart.objects.get(pk=cartid)
 
     user_id = request.session.get('user_id')
 
@@ -443,21 +467,131 @@ def sub_to_cart(request):
 
     data = {
         "status": "200",
-        'msg': "ok",
+        "msg": "ok",
+
     }
 
     if cart_obj.c_goods_num == 1:
         cart_obj.delete()
-        data['c_goods_num'] = 0
+        data["c_goods_num"] = 0
     else:
         cart_obj.c_goods_num = cart_obj.c_goods_num - 1
         cart_obj.save()
-        data['c_goods_num'] = cart_obj.c_goods_num
+        data["c_goods_num"] = cart_obj.c_goods_num
 
-    data["total_price"] = get_total_price(request.session.get("user_id")),
+    data["total_price"] = get_total_price(request.session.get("user_id"))
 
     return JsonResponse(data)
 
 
-# def test(request):
-#     return True
+def make_order(request):
+    cartlist = request.GET.get("cartlist")
+
+    cart_list = cartlist.split("#")
+
+    order = Order()
+
+    user_id = request.session.get('user_id')
+
+    order.o_user_id = user_id
+
+    order.o_total_price = get_total_price(user_id)
+
+    order.save()
+
+    for cart_id in cart_list:
+        ordergoods = OrderGoods()
+
+        cart_obj = Cart.objects.get(pk=cart_id)
+
+        ordergoods.o_goods_num = cart_obj.c_goods_num
+
+        ordergoods.o_order_id = order.id
+
+        ordergoods.o_goods_id = cart_obj.c_goods_id
+
+        ordergoods.save()
+
+        cart_obj.delete()
+
+    data = {
+        "msg": "ok",
+        "orderid": order.id,
+        "status": "200",
+    }
+
+    return JsonResponse(data)
+
+
+#  在企业开发中，对一个数据的合法性和有效性 要添加各种判断
+def order_detail(request):
+    order_id = request.GET.get("order_id")
+
+    order = Order.objects.get(pk=order_id)
+
+    data = {
+        "title": "订单详情",
+        "order": order
+    }
+
+    return render(request, 'order/order_detail.html', context=data)
+
+
+def order_list(request):
+    user_id = request.session.get('user_id')
+
+    user = get_user_by_id(user_id)
+
+    orders = user.order_set.filter(o_status=0)
+
+    data = {
+        "title": "订单列表",
+        "orders": orders
+    }
+
+    return render(request, 'order/order_list.html', context=data)
+
+
+def alipay(request):
+    # 伪支付
+    order_id = request.GET.get("orderid")
+
+    order = Order.objects.get(pk=order_id)
+    # 开发中 最好写成常量
+    order.o_status = 1
+
+    order.save()
+
+    data = {
+        "msg": "ok",
+        "status": "200"
+    }
+
+    return JsonResponse(data)
+
+
+def get_phone(request):
+    # num = random.randrange(100)
+    #
+    # if num > 98:
+    #     return HttpResponse("恭喜你免费抽到一个小米8")
+    # else:
+    #     return HttpResponse("正在排队")
+
+    items = []
+
+    for i in range(10):
+        items.append(i)
+
+    items.append("10&black=true")
+
+    data = {
+        'items': items
+    }
+
+    return render(request, 'teach.html', context=data)
+
+
+def get_article(request):
+    send_mail_asy.delay("liuyuan@qq,com")
+    return HttpResponse("页面数据" + request.GET.get("page"))

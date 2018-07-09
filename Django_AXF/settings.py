@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'App',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -46,6 +47,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'middle.LearnAOP.HelloMiddle',
 ]
 
 ROOT_URLCONF = 'Django_AXF.urls'
@@ -150,3 +152,11 @@ EMAIL_PORT = 25
 EMAIL_HOST_USER = "liuyuan2684119@163.com"
 
 EMAIL_HOST_PASSWORD = "liuyuan119"
+
+
+# ############ Celery settings
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'django-db'

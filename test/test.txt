@@ -21,3 +21,7 @@ ttl ,.,
 
 
 ajax请求  重定向的时候 ajax不能识别  所以不会跳转
+
+-U celery['redis']
+celery
+

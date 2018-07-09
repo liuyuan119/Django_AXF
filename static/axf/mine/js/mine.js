@@ -6,4 +6,10 @@ $(function () {
 
     })
 
+    $("#not_payed").click(function () {
+
+        window.open('/axf/orderlist/', target="_self");
+
+    })
+
 })
