@@ -14,7 +14,7 @@ from django.views.generic import TemplateView
 
 from App.models import MainWheel, MainNav, MainMustBuy, MainShop, MainShow, FoodType, Goods, UserModel, Cart, Order, \
     OrderGoods
-from App.tasks import send_mail_asy
+from App.tasks import send_mail_asy, send_mail_to_asy
 from App.viewhelper import get_user, send_mail_to, get_user_by_id, get_total_price
 
 ALL_TYPE = "0"
@@ -289,7 +289,7 @@ class UserRegisterView(View):
 
         active_url = "http://localhost:8002/axf/active/?token=" + token
 
-        send_mail_to(u_username, active_url, u_email)
+        send_mail_to_asy.delay(u_username, active_url, u_email)
 
         # request.session["user_id"] = user.id
 

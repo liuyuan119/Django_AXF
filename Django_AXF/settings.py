@@ -146,11 +146,8 @@ CACHES = {
 
 
 EMAIL_HOST = 'smtp.163.com'
-
 EMAIL_PORT = 25
-
 EMAIL_HOST_USER = "liuyuan2684119@163.com"
-
 EMAIL_HOST_PASSWORD = "liuyuan119"
 
 

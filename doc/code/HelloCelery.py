@@ -11,6 +11,7 @@ def send_mail():
     sleep(5)
 
     print("邮件发送成功")
+    return 123
 
 
 if __name__ == '__main__':

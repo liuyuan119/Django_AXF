@@ -24,7 +24,7 @@ def send_mail_to(username, active_url, receive_mail):
 
     html_message = temp.render(context=data)
 
-    send_mail(subject, "xxx", from_email="rongjiawei1204@163.com", recipient_list=[receive_mail],
+    send_mail(subject, "xxx", from_email="liuyuan2684119@163.com", recipient_list=[receive_mail],
               html_message=html_message)
 
 
